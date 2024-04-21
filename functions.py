@@ -1,6 +1,7 @@
 import urllib.parse
 import re
 import os
+import streamlit as st
 
 def load_template(file_path):
     try:
@@ -79,3 +80,17 @@ def load_css(css_filename):
     except FileNotFoundError:
         print(f"CSS file not found at path: {css_path}")
         return None
+
+def copy_button(body_text):
+    button_html = f"""
+    <textarea id='textToCopy' style='opacity: 0; position: absolute; top: -9999px;'>{body_text}</textarea>
+    <button id='copyButton' data-clipboard-target='#textToCopy'>Copy to clipboard</button>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js'></script>
+    <script>
+    new ClipboardJS('#copyButton');
+    document.getElementById('copyButton').onclick = function() {{
+        alert('Copied to clipboard!');
+    }};
+    </script>
+    """
+    st.markdown(button_html, unsafe_allow_html=True)

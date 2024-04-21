@@ -1,7 +1,9 @@
 import streamlit as st
-from functions import parse_css, load_css, load_template, format_template, create_mailto_link, extract_placeholders, load_translation
+from functions import parse_css, load_css, load_template, format_template, create_mailto_link, extract_placeholders, load_translation, copy_button
 from data_manager import load_placeholder_data
 from clipboard import copy as clipboard_copy
+from streamlit import components
+
 import os
 
 # Carregar o conteúdo do CSS
@@ -132,33 +134,30 @@ def main():
     cc_emails = " "  # Suponha que não haja CCs inicialmente
 
     if st.button("Prepare E-mail"):
-        # Verifica se todos os campos relevantes estão preenchidos corretamente.
-        if all((value or '').strip() for value in data.values() if value is not None):
-            # Mapeamento de assuntos de e-mail
-            subject_map = {
-                "New PC Request": f"新しいPCのリクエスト || チケット番号: {data.get('ticket', 'No Ticket')}",
-                "Bring Laptop to us": f"{data.get('incident_description', 'No Description')} || チケット番号: {data.get('ticket', 'No Ticket')}",
-                "Please more information": f"追加情報をお願いします || チケット番号: {data.get('ticket', 'No Ticket')}",
-                "PC Send": f"PCを発送しました || チケット番号: {data.get('ticket', 'No Ticket')}",
-                "Hardware Reclaim": f"ハードウェアの回収 || チケット番号: {data.get('ticket', 'No Ticket')}",
-                "Status Update": f"ステータス更新 || チケット番号: {data.get('ticket', 'No Ticket')}",
-                "Ticket done": f"チケット処理完了 || チケット番号: {data.get('ticket', 'No Ticket')}",
-                "Thank you for your time": f"お時間をいただきありがとうございます || チケット番号: {data.get('ticket', 'No Ticket')}"
-            }
-            
-            subject = subject_map.get(template_name, "Default Subject")
+            if all((value or '').strip() for value in data.values() if value is not None):
+                body = template_content.format(**data)
+                subject_map = {
+                    "New PC Request": f"新しいPCのリクエスト || チケット番号: {data.get('ticket', 'No Ticket')}",
+                    "Bring Laptop to us": f"{data.get('incident_description', 'No Description')} || チケット番号: {data.get('ticket', 'No Ticket')}",
+                    "Please more information": f"追加情報をお願いします || チケット番号: {data.get('ticket', 'No Ticket')}",
+                    "PC Send": f"PCを発送しました || チケット番号: {data.get('ticket', 'No Ticket')}",
+                    "Hardware Reclaim": f"ハードウェアの回収 || チケット番号: {data.get('ticket', 'No Ticket')}",
+                    "Status Update": f"ステータス更新 || チケット番号: {data.get('ticket', 'No Ticket')}",
+                    "Ticket done": f"チケット処理完了 || チケット番号: {data.get('ticket', 'No Ticket')}",
+                    "Thank you for your time": f"お時間をいただきありがとうございます || チケット番号: {data.get('ticket', 'No Ticket')}"
+                }
+                subject = subject_map.get(template_name, "Default Subject")
+                mailto_link = create_mailto_link(recipient_email, cc_emails, subject)
+                st.markdown(f'[Open in Email Client]({mailto_link})', unsafe_allow_html=True)
 
-            body = format_template(template_content, data)
-            try:
-                clipboard_copy(body)
-                st.success("E-mail prepared and body text copied to clipboard.")
-            except Exception as e:
-                st.error(f"Failed to copy to clipboard. teste teste teste {e}")
-            
-            mailto_link = create_mailto_link(recipient_email, cc_emails, subject)
-            st.markdown(f'[Open in Email Client]({mailto_link})', unsafe_allow_html=True)
-        else:
-            st.error("Please fill all the fields.")
+
+                # Cria uma área de texto com o corpo do e-mail
+                st.text_area("E-mail body:", value=body, height=500)
+
+                # Botão de copiar para a área de transferência
+                #copy_button(body)
+            else:
+                st.error("Please fill all the fields.")
 
 if __name__ == "__main__":
     main()
