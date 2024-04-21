@@ -153,7 +153,7 @@ def main():
                 clipboard_copy(body)
                 st.success("E-mail prepared and body text copied to clipboard.")
             except Exception as e:
-                st.error(f"Failed to copy to clipboard. {e}")
+                st.error(f"Failed to copy to clipboard. teste teste teste {e}")
             
             mailto_link = create_mailto_link(recipient_email, cc_emails, subject)
             st.markdown(f'[Open in Email Client]({mailto_link})', unsafe_allow_html=True)
